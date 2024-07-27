@@ -152,7 +152,7 @@ The `@cache($key)` directive will either retrieve content from the cache or crea
 
 The secret to these strategies is using the cache utility classes provided by the `HasCacheKey` trait, which should be added to classes where you want to use the block cache. The trait includes methods for well-known cache invalidation strategies:
 
-<! -- 
+<!-- 
 - **Time-to-Live (TTL):** Automatically expires cached content after a set period.
   - `setTTL($key, $seconds)`
 - **Manual Invalidation:** Requires explicit action to clear or refresh the cache.
