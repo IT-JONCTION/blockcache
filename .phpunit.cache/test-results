@@ -1,0 +1,1 @@
+{"version":1,"defects":{"HasCacheKeyTest::test_it_gets_a_unique_cache_key_for_an_eloquent_model":7},"times":{"HasCacheKeyTest::test_it_gets_a_unique_cache_key_for_an_eloquent_model":0.035}}
