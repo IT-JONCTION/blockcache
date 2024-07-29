@@ -15,11 +15,22 @@ class BlockCacheServiceProvider extends ServiceProvider
     {
         //
         Blade::directive('cache', function ($expression) {
-            return "<?php if ( !Itjonction\Blockcache\BlockCaching::setUp({$expression}) ) { ?>";
+            return "<?php if ( ! app('Itjonction\Blockcache\BladeDirective')->setUp({$expression}) ) { ?>";
         });
 
         Blade::directive('endcache', function () {
-            return "<?php } echo Itjonction\Blockcache\BlockCaching::tearDown() ?>";
+            return "<?php } echo app('Itjonction\Blockcache\BladeDirective')->tearDown() ?>";
+        });
+    }
+
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+        $this->app->singleton(BladeDirective::class, function () {
+            return new BladeDirective();
         });
     }
 }

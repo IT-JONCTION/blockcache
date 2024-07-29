@@ -3,7 +3,8 @@
     "description": "Block caching for both laravel and vanilla php",
     "require-dev": {
         "phpunit/phpunit": "11.3.x-dev",
-        "illuminate/database": "^12.0@dev"
+        "illuminate/database": "^12.0@dev",
+        "illuminate/cache": "^12.0@dev"
     },
     "license": "proprietary",
     "autoload": {
