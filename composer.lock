@@ -940,12 +940,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/translation.git",
-                "reference": "bd2fa54b5bbdc1377866dc7587d0ca645d7a31ad"
+                "reference": "ff1b71fff23ad2f0eddb60580a5bc7baa2aee891"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/translation/zipball/bd2fa54b5bbdc1377866dc7587d0ca645d7a31ad",
-                "reference": "bd2fa54b5bbdc1377866dc7587d0ca645d7a31ad",
+                "url": "https://api.github.com/repos/symfony/translation/zipball/ff1b71fff23ad2f0eddb60580a5bc7baa2aee891",
+                "reference": "ff1b71fff23ad2f0eddb60580a5bc7baa2aee891",
                 "shasum": ""
             },
             "require": {
@@ -1026,7 +1026,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-07-26T12:49:40+00:00"
+            "time": "2024-07-28T16:55:23+00:00"
         },
         {
             "name": "symfony/translation-contracts",
@@ -1999,12 +1999,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "f513aa6c4b2056e632cb60bcf96ffe239df96c55"
+                "reference": "bdded73ccc6ed045e0051f69e245d53ec494ae28"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/f513aa6c4b2056e632cb60bcf96ffe239df96c55",
-                "reference": "f513aa6c4b2056e632cb60bcf96ffe239df96c55",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/bdded73ccc6ed045e0051f69e245d53ec494ae28",
+                "reference": "bdded73ccc6ed045e0051f69e245d53ec494ae28",
                 "shasum": ""
             },
             "require": {
@@ -2092,7 +2092,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-07-26T15:24:27+00:00"
+            "time": "2024-07-29T06:27:38+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -3088,7 +3088,8 @@
     "stability-flags": {
         "illuminate/support": 20,
         "phpunit/phpunit": 20,
-        "illuminate/database": 20
+        "illuminate/database": 20,
+        "illuminate/cache": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
