@@ -44,6 +44,78 @@ By surrounding this block of HTML with the `@cache` and `@endcache` directives, 
 
 Please keep in mind that, in production, this will cache the HTML fragment "forever." For local development, on the other hand, we'll automatically flush the relevant cache for you each time you refresh the page. That way, you may update your views and templates however you wish, without needing to worry about clearing the cache manually.
 
+## Legacy templates classes
+Whilst this package relies on Laravel classes, Laravel doesn't need to be bootstrapped. To use this library in a non-laravel template do the following to use the `Blockcache` directly:
+
+```php
+    use Itjonction\Blockcache\General\CacheManager;
+    use Illuminate\Cache\Repository;
+    use Illuminate\Redis\RedisManager;
+    use Illuminate\Cache\RedisStore;
+    use Illuminate\Foundation\Application;
+    
+    // Configure Redis connection settings
+    $config = [
+        'default' => [
+            'url' => env('REDIS_URL', null),
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', 6379),
+            'database' => env('REDIS_DB', 0),
+        ],
+    ];
+    
+    // Create the Redis manager instance
+    $redisManager = new RedisManager($app, 'predis', ['default' => $config['default']]);
+    
+    // Create the Redis store instance
+    $redisStore = new RedisStore($redisManager, 'cache');
+    
+    // Create the Cache repository instance
+    $cache = new Repository($redisStore);
+    $cacheManager = new CacheManager($cache);
+    $cacheManager = new CacheManager($cache);
+    $cacheManager->startCache('my-cache-key');
+    echo "<div>view fragment</div>";
+    $output = $cacheManager->endCache();
+...
+```
+Alternatively even in legacy code you can still bootstrap the Laravel application instance:
+```php
+// bootstrap_laravel.php
+
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Foundation\Application;
+
+// Path to the Laravel application
+$appPath = __DIR__ . '/path/to/your/laravel';
+
+// Require the Laravel application
+$app = require $appPath . '/bootstrap/app.php';
+
+// Make the kernel (HTTP kernel is enough to access most services)
+$kernel = $app->make(Kernel::class);
+
+// Bootstrap the application
+$kernel->bootstrap();
+
+// You can now use Laravel's config, cache, etc.
+return $app;
+```
+This allows you to cache any view fragment, regardless of whether it's a Blade template or not.
+```php
+    use Itjonction\Blockcache\General\CacheManager;
+    use Illuminate\Foundation\Application;
+    
+    // Create a new application instance (optional but useful for dependency resolution)
+    $app = require __DIR__ . '/path/to/bootstrap_laravel.php';
+    
+    // Create the Cache repository instance
+    $cacheManager = new CacheManager($app->make('cache'));
+    $cacheManager->startCache('my-cache-key');
+    echo "<div>view fragment</div>";
+    $output = $cacheManager->endCache();     
+```
 Now because your production server will cache the fragments forever, you'll want to add a step to your deployment process that clears the relevant cache.
 
 ```php
@@ -210,8 +282,6 @@ Behind the scenes, we'll look for a `getCacheKey` method on the model. Now, as m
 
 This instructs the package to use `my-custom-key` for the cache instead. This can be useful for pagination and other related tasks.
 
-## Legacy templates classes 
-Whilst this package relies on Laravel classes, Laravel doesn't need to be bootstrapped. To use this library in a non-laravel template do the following...
 
 TODO: write the docs
 TODO: link to a video of the POC
