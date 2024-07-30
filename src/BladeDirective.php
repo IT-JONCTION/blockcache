@@ -2,6 +2,8 @@
 
 namespace Itjonction\Blockcache;
 
+use Itjonction\Blockcache\Blade\CacheManager;
+
 class BladeDirective
 {
     protected array $keys = [];

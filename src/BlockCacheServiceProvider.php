@@ -5,6 +5,7 @@ namespace Itjonction\Blockcache;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Cache\Repository as Cache;
+use Itjonction\Blockcache\Blade\CacheManager;
 
 class BlockCacheServiceProvider extends ServiceProvider
 {

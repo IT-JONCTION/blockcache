@@ -4,7 +4,7 @@
 use Illuminate\Cache\ArrayStore;
 use Illuminate\Cache\Repository;
 use Itjonction\Blockcache\BladeDirective;
-use Itjonction\Blockcache\CacheManager;
+use Itjonction\Blockcache\Blade\CacheManager;
 
 class BladeDirectiveTest extends TestCase
 {

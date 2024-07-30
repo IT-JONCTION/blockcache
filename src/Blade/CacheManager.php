@@ -1,6 +1,6 @@
 <?php
 
-namespace Itjonction\Blockcache;
+namespace Itjonction\Blockcache\Blade;
 
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Database\Eloquent\Model;
