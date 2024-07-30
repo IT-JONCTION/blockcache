@@ -3,14 +3,14 @@
 namespace Itjonction\Blockcache;
 
 use Exception;
-use Itjonction\Blockcache\Blade\CacheManager;
+use Itjonction\Blockcache\Blade\CacheManagerInterface;
 
 class BladeDirective
 {
     protected array $keys = [];
-    protected CacheManager $cache;
+    protected CacheManagerInterface $cache;
 
-    public function __construct(CacheManager $cache)
+    public function __construct(CacheManagerInterface $cache)
     {
         $this->cache = $cache;
     }

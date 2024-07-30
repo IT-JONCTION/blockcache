@@ -5,12 +5,12 @@ namespace Itjonction\Blockcache\Blade;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Database\Eloquent\Model;
 
-class CacheManager
+class CacheManager implements CacheManagerInterface
 {
 
-    protected $cache;
+    protected Repository $cache;
 
-    public function __construct($cache)
+    public function __construct(Repository $cache)
     {
         $this->cache = $cache;
     }
@@ -25,7 +25,7 @@ class CacheManager
         });
     }
 
-    public function has($key)
+    public function has($key): bool
     {
         $key = $this->normalizeCacheKey($key);
         return $this->cache->tags('views')->has($key);

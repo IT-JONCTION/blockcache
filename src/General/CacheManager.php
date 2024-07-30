@@ -4,14 +4,16 @@ namespace Itjonction\Blockcache\General;
 
 use Exception;
 use Itjonction\Blockcache\BladeDirective;
+use Itjonction\Blockcache\Blade\CacheManager as BladeCacheManager;
 
-class CacheManager
+class CacheManager extends BladeCacheManager
 {
     protected BladeDirective $bladeDirective;
 
-    public function __construct(BladeDirective $bladeDirective)
+    public function __construct($cache)
     {
-        $this->bladeDirective = $bladeDirective;
+        $this->bladeDirective = new BladeDirective($this);
+        parent::__construct($cache);
     }
 
     /**
