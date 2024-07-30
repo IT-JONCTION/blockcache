@@ -357,7 +357,7 @@ Yes. For example:
     <div>view here</div>
 @endcache
 ```
-Simply providing a string rather than a model instructs the package to use `my-custom-key` for the cache instead.
+Simply providing a string, rather than a model, instructs the package to use `my-custom-key` for the cache instead.
 
 ---
 
