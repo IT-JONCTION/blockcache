@@ -2,13 +2,13 @@
 
 Blockcache is a package for Laravel that provides nested block caching for your view logic.
 
-## Lavavel Installation
+## Laravel Installation
 
 ### Step 2: Service Provider
 
 For your Laravel app, open `config/app.php` and, within the `providers` array, append:
 
-```
+```php
 Itjonction\Blockcache\BlockcacheServiceProvider::class
 ```
 
@@ -18,13 +18,13 @@ This will bootstrap the package into Laravel.
 
 For this package to function properly, you must use a Laravel cache driver that supports tagging (like `Cache::tags('foo')`). Drivers such as Memcached and Redis support this feature.
 
-Check your `.env` file, and ensure that your `CACHE_DRIVER` choice accomodates this requirement:
+Check your `.env` file, and ensure that your `CACHE_DRIVER` choice accommodates this requirement:
 
-```
+```dotenv
 CACHE_DRIVER=memcached
 ```
 
-> Have a look at [Laravel's cache configuration documentation](https://laravel.com/docs/5.2/cache#configuration), if you need any help.
+> Refer to [Laravel's cache configuration documentation](https://laravel.com/docs/5.2/cache#configuration) if you need any help.
 
 ## Usage
 
@@ -40,11 +40,87 @@ With the package now installed, you may use the provided `@cache` Blade directiv
 @endcache
 ```
 
-By surrounding this block of HTML with the `@cache` and `@endcache` directives, we're asking the package to cache the given HTML. Now this example is trivial, however, you can imagine a more complex view that includes various nested caches, as well as lazy-loaded relationship calls that trigger additional database queries. After the initial page load that caches the HTML fragment, each subsequent refresh will instead pull from the cache. As such, those additional database queries will never be executed.
+By surrounding this block of HTML with the `@cache` and `@endcache` directives, you are instructing the package to cache the given HTML. While this example is trivial, you can imagine more complex views with nested caches and lazy-loaded relationship calls triggering additional database queries. After the initial page load that caches the HTML fragment, each subsequent refresh will pull from the cache, preventing additional database queries.
 
-Please keep in mind that, in production, this will cache the HTML fragment "forever." For local development, on the other hand, we'll automatically flush the relevant cache for you each time you refresh the page. That way, you may update your views and templates however you wish, without needing to worry about clearing the cache manually.
+In production, this will cache the HTML fragment indefinitely. For local development, the relevant cache will automatically flush each time you refresh the page, allowing you to update your views and templates without needing to clear the cache manually.
 
-Now because your production server will cache the fragments forever, you'll want to add a step to your deployment process that clears the relevant cache.
+## Legacy Templates and Classes
+
+While this package relies on Laravel classes, Laravel doesn't need to be bootstrapped. To use this library in a non-Laravel template, do the following to use `Blockcache` directly:
+
+```php
+use Itjonction\Blockcache\General\CacheManager;
+use Illuminate\Cache\Repository;
+use Illuminate\Redis\RedisManager;
+use Illuminate\Cache\RedisStore;
+use Illuminate\Foundation\Application;
+
+// Configure Redis connection settings
+$config = [
+    'default' => [
+        'url' => env('REDIS_URL', null),
+        'host' => env('REDIS_HOST', '127.0.0.1'),
+        'password' => env('REDIS_PASSWORD', null),
+        'port' => env('REDIS_PORT', 6379),
+        'database' => env('REDIS_DB', 0),
+    ],
+];
+
+// Create the Redis manager instance
+$redisManager = new RedisManager($app, 'predis', ['default' => $config['default']]);
+
+// Create the Redis store instance
+$redisStore = new RedisStore($redisManager, 'cache');
+
+// Create the Cache repository instance
+$cache = new Repository($redisStore);
+$cacheManager = new CacheManager($cache);
+$cacheManager->startCache('my-cache-key');
+echo "<div>view fragment</div>";
+$output = $cacheManager->endCache();
+```
+
+Alternatively, even in legacy code, you can still bootstrap the Laravel application instance:
+
+```php
+// bootstrap_laravel.php
+
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Foundation\Application;
+
+// Path to the Laravel application
+$appPath = __DIR__ . '/path/to/your/laravel';
+
+// Require the Laravel application
+$app = require $appPath . '/bootstrap/app.php';
+
+// Make the kernel (HTTP kernel is enough to access most services)
+$kernel = $app->make(Kernel::class);
+
+// Bootstrap the application
+$kernel->bootstrap();
+
+// You can now use Laravel's config, cache, etc.
+return $app;
+```
+
+This allows you to cache any view fragment, regardless of whether it's a Blade template or not.
+
+```php
+use Itjonction\Blockcache\General\CacheManager;
+use Illuminate\Foundation\Application;
+
+// Create a new application instance (optional but useful for dependency resolution)
+$app = require __DIR__ . '/path/to/bootstrap_laravel.php';
+
+// Create the Cache repository instance
+$cacheManager = new CacheManager($app->make('cache'));
+$cacheManager->startCache('my-cache-key');
+echo "<div>view fragment</div>";
+$output = $cacheManager->endCache();
+```
+
+Since your production server will cache the fragments indefinitely, add a step to your deployment process to clear the relevant cache:
 
 ```php
 Cache::tags('views')->flush();
@@ -52,14 +128,14 @@ Cache::tags('views')->flush();
 
 ### Caching Models
 
-While you're free to hard-code any string for the cache key, the true power of Russian-Doll caching comes into play when we use a cache invalidation strategy, for instance timestamp-based approach.
+While you're free to hard-code any string for the cache key, the true power of Russian-Doll caching comes into play when using a cache invalidation strategy, such as a timestamp-based approach.
 
 Consider the following fragment:
 
 ```html
 @cache($post)
     <article>
-        <h2>{{ $post->title }}></h2>
+        <h2>{{ $post->title }}</h2>
         <p>Written By: {{ $post->author->username }}</p>
 
         <div class="body">{{ $post->body }}</div>
@@ -67,7 +143,7 @@ Consider the following fragment:
 @endcache
 ```
 
-In this example, we're passing the `$post` object, itself, to the `@cache` directive - rather than a string. The package will then look for a `getCacheKey()` method on the model. We've already done that work for you; just have your Eloquent model use the `Itjonction\Blockcache\HasCacheKey` trait, like so:
+In this example, we're passing the `$post` object to the `@cache` directive instead of a string. The package will look for a `getCacheKey()` method on the model. To enable this, have your Eloquent model use the `Itjonction\Blockcache\HasCacheKey` trait:
 
 ```php
 use Itjonction\Blockcache\HasCacheKey;
@@ -78,23 +154,23 @@ class Post extends Eloquent
 }
 ```
 
-Alternatively, you may use this trait on a parent class that each of your Eloquent models extend.
+Alternatively, you may use this trait on a parent class that your Eloquent models extend.
 
-That should do it! Now, the cache key for this fragment will include the object's `id` and `updated_at` timestamp: `App\Post/1-13241235123`.
+Now, the cache key for this fragment will include the object's `id` and `updated_at` timestamp: `App\Post/1-13241235123`.
 
-> The key is that, because we factor the `updated_at` timestamp into the cache key, whenever you update the given post, the cache key will change. This will then, in effect, bust the cache!
+> The key is that, because we factor the `updated_at` timestamp into the cache key, whenever you update the post, the cache key will change, effectively busting the cache.
 
 #### Touching
 
-In order for this technique to work properly, it's vital that we have some mechanism to alert parent relationships (and subsequently bust parent caches) each time a model is updated. Here's a basic workflow:
+For this technique to work properly, we need a mechanism to alert parent relationships (and subsequently bust parent caches) each time a model is updated. Here's a basic workflow:
 
 1. Model is updated in the database.
 2. Its `updated_at` timestamp is refreshed, triggering a new cache key for the instance.
 3. The model "touches" (or pings) its parent.
-4. The parent's `updated_at` timestamp, too, is updated, which busts its associated cache.
+4. The parent's `updated_at` timestamp is updated, busting its associated cache.
 5. Only the affected fragments re-render. All other cached items remain untouched.
 
-Luckily, Laravel offers this "touch" functionality out of the box. Consider a `Note` object that needs to alert its parent `Card` relationship each time an update occurs.
+Laravel offers this "touch" functionality out of the box. Consider a `Note` object that needs to alert its parent `Card` relationship each time an update occurs.
 
 ```php
 <?php
@@ -117,9 +193,9 @@ class Note extends Model
 }
 ```
 
-Notice the `$touches = ['card']` portion. This instructs Laravel to ping the `card` relationship's timestamps each time the note is updated.
+The `$touches = ['card']` portion instructs Laravel to ping the `card` relationship's timestamps each time the note is updated.
 
-Now, everything is in place. You might render your view, like so:
+Now, you might render your view like this:
 
 **resources/views/cards/_card.blade.php**
 
@@ -145,12 +221,13 @@ Now, everything is in place. You might render your view, like so:
 @endcache
 ```
 
-Notice the Russian-Doll style cascading for our caches; that's the key. If any note is updated, its individual cache will clear - along with its parent - but any  siblings will remain untouched.
+Notice the Russian-Doll style cascading for our caches; if any note is updated, its individual cache will clear, along with its parent, but any siblings will remain untouched.
 
-### Other invalidation strategies
-The `@cache($key)` directive will either retrieve content from the cache or create a new cache entry for the specified content. Therefore, by manipulating the cache key, you can implement various caching strategies. 
+### Other Invalidation Strategies
 
-The secret to these strategies is using the cache utility classes provided by the `HasCacheKey` trait, which should be added to classes where you want to use the block cache. The trait includes methods for well-known cache invalidation strategies:
+The `@cache($key)` directive will either retrieve content from the cache or create a new cache entry for the specified content. By manipulating the cache key, you can implement various caching strategies.
+
+The secret to these strategies is using the cache utility classes provided by the `HasCacheKey` trait, which should be added to classes where you want to use the block cache. The trait includes methods for well-known cache invalidation strategies.
 
 <!-- 
 - **Time-to-Live (TTL):** Automatically expires cached content after a set period.
@@ -170,11 +247,11 @@ The secret to these strategies is using the cache utility classes provided by th
   - `conditionalCache($key, $headers)`
 - **Write-Through Cache:** Updates cache key when the data within the cache changes.
   - `writeThroughCache($key)`
---> 
+-->
 
 ### Caching Collections
 
-You won't always want to cache model instances; you may wish to cache a Laravel collection as well! No problem.
+You may also wish to cache a Laravel collection:
 
 ```html
 @cache($posts)
@@ -184,15 +261,15 @@ You won't always want to cache model instances; you may wish to cache a Laravel 
 @endcache
 ```
 
-Now, as long as the `$posts` collection contents does not change, that `@foreach` section will never run. Instead, as always, we'll pull from the cache.
+As long as the `$posts` collection contents do not change, that `@foreach` section will never run. Instead, we'll pull from the cache.
 
-Behind the scenes, this package will detect that you've passed a Laravel collection to the `cache` directive, and will subsequently generate a unique cache key for the collection.
+Behind the scenes, this package will detect that you've passed a Laravel collection to the `cache` directive and will generate a unique cache key for the collection.
 
 ## FAQ
 
 **1. Is there any way to override the cache key for a model instance?**
 
-Yes. Let's say you have:
+Yes. For example:
 
 ```html
 @cache($post)
@@ -200,7 +277,7 @@ Yes. Let's say you have:
 @endcache
 ```
 
-Behind the scenes, we'll look for a `getCacheKey` method on the model. Now, as mentioned above, you can use the `Itjonction\Blockcache\HasCacheKey` trait to instantly import this functionality. Alternatively, you may pass a second argument to the `@cache` directive, like this:
+The package will look for a `getCacheKey` method on the model. You can use the `Itjonction\Blockcache\HasCacheKey` trait to import this functionality. Alternatively, you may pass a second argument to the `@cache` directive:
 
 ```html
 @cache($post, 'my-custom-key')
@@ -208,13 +285,12 @@ Behind the scenes, we'll look for a `getCacheKey` method on the model. Now, as m
 @endcache
 ```
 
-This instructs the package to use `my-custom-key` for the cache instead. This can be useful for pagination and other related tasks.
+This instructs the package to use `my-custom-key` for the cache instead, useful for tasks like pagination.
 
-## Legacy templates classes 
-Whilst this package relies on Laravel classes, Laravel doesn't need to be bootstrapped. To use this library in a non-laravel template do the following...
+---
 
-TODO: write the docs
-TODO: link to a video of the POC
-TODO: how to set a flag so that it either doesn't cache in dev, or recognizes template changes - it can't rely on middleware
-TODO: write all the invalidation strategies
-
+**TODOs:**
+1. Write the docs.
+2. Link to a video of the POC.
+3. Determine how to set a flag to avoid caching in dev or recognize template changes without relying on middleware.
+4. Write all the invalidation strategies.
