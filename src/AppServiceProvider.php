@@ -4,6 +4,7 @@ namespace Itjonction\Blockcache;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Cache\Repository as Cache;
 
 class BlockCacheServiceProvider extends ServiceProvider
 {
@@ -28,9 +29,10 @@ class BlockCacheServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
         $this->app->singleton(BladeDirective::class, function () {
-            return new BladeDirective();
+            return new BladeDirective(
+                new CacheManager($this->app->make(Cache::class))
+            );
         });
     }
 }
