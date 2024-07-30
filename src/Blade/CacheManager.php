@@ -3,11 +3,11 @@
 namespace Itjonction\Blockcache\Blade;
 
 use Illuminate\Contracts\Cache\Repository;
-use Illuminate\Database\Eloquent\Model;
+use Itjonction\Blockcache\Contracts\Cacheable;
+use Itjonction\Blockcache\Contracts\ManagesCaches;
 
-class CacheManager implements CacheManagerInterface
+class CacheManager implements ManagesCaches
 {
-
     protected Repository $cache;
 
     public function __construct(Repository $cache)
@@ -33,7 +33,7 @@ class CacheManager implements CacheManagerInterface
 
     protected function normalizeCacheKey($key)
     {
-        if($key instanceof Model) {
+        if($key instanceof Cacheable) {
             return $key->getCacheKey();
         }
         return $key;

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Eloquent\Model;
+use Itjonction\Blockcache\Contracts\Cacheable;
 use Itjonction\Blockcache\HasCacheKey;
 use Illuminate\Database\Capsule\Manager as DB;
 
@@ -12,7 +13,7 @@ abstract class TestCase extends PHPUnit\Framework\TestCase
         $this->setUpDatabase();
         $this->migrateTables();
     }
-    protected function setUpDatabase()
+    protected function setUpDatabase(): void
     {
         $database = new DB;
         $database->addConnection([
@@ -22,7 +23,7 @@ abstract class TestCase extends PHPUnit\Framework\TestCase
         $database->bootEloquent();
         $database->setAsGlobal();
     }
-    protected function migrateTables()
+    protected function migrateTables(): void
     {
         DB::schema()->create('posts', function ($table) {
             $table->increments('id');
@@ -39,8 +40,10 @@ abstract class TestCase extends PHPUnit\Framework\TestCase
     }
 }
 
-class Post extends Model
+class Post extends Model implements Cacheable
 {
     use HasCacheKey;
+
+    public mixed $updated_at;
 }
 

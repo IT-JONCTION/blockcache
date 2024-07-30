@@ -6,7 +6,6 @@ use Itjonction\Blockcache\Blade\CacheManager;
 
 class BladeCacheManagerTest extends TestCase
 {
-
     function test_it_caches_the_given_key_from_model()
     {
         $post = $this->makePost();

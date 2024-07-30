@@ -14,6 +14,4 @@ trait HasCacheKey
             $this->updated_at->timestamp
         );
     }
-
-
 }

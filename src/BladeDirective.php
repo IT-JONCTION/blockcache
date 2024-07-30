@@ -3,14 +3,15 @@
 namespace Itjonction\Blockcache;
 
 use Exception;
-use Itjonction\Blockcache\Blade\CacheManagerInterface;
+use Illuminate\Support\Collection;
+use Itjonction\Blockcache\Contracts\ManagesCaches;
 
 class BladeDirective
 {
     protected array $keys = [];
-    protected CacheManagerInterface $cache;
+    protected ManagesCaches $cache;
 
-    public function __construct(CacheManagerInterface $cache)
+    public function __construct(ManagesCaches $cache)
     {
         $this->cache = $cache;
     }
@@ -56,7 +57,7 @@ class BladeDirective
 
         // If we're dealing with a collection, we'll
         // use a hashed version of its contents.
-        if ($item instanceof \Illuminate\Support\Collection) {
+        if ($item instanceof Collection) {
             return md5($item);
         }
 

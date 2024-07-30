@@ -39,6 +39,9 @@ class GeneralCacheManagerTest extends TestCase
         $this->assertTrue($cacheManager->has('arbitrary-string'));
     }
 
+    /**
+     * @throws Exception
+     */
     function test_it_can_use_a_block_cache()
     {
         $cache = new Repository(

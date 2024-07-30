@@ -17,7 +17,7 @@ class BlockCacheServiceProvider extends ServiceProvider
     {
         //
         Blade::directive('cache', function ($expression) {
-            return "<?php if ( ! app('Itjonction\Blockcache\BladeDirective')->setUp({$expression}) ) { ?>";
+            return "<?php if ( ! app('Itjonction\Blockcache\BladeDirective')->setUp($expression) ) { ?>";
         });
 
         Blade::directive('endcache', function () {

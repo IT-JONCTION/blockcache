@@ -1,11 +1,10 @@
 <?php
 
-namespace Itjonction\Blockcache\Blade;
+namespace Itjonction\Blockcache\Contracts;
 
 use Illuminate\Contracts\Cache\Repository;
-use Illuminate\Database\Eloquent\Model;
 
-interface CacheManagerInterface
+interface ManagesCaches
 {
     public function __construct(Repository $cache);
 

@@ -10,6 +10,10 @@ class BladeDirectiveTest extends TestCase
 {
 
     protected CacheManager $cacheManager;
+
+    /**
+     * @throws Exception
+     */
     public function test_it_sets_up_opening_cache_directive()
     {
         $directive = $this->createNewCacheDirective();
