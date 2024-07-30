@@ -4,7 +4,7 @@ use Illuminate\Cache\ArrayStore;
 use Illuminate\Cache\Repository;
 use Itjonction\Blockcache\Blade\CacheManager;
 
-class CacheManagerTest extends TestCase
+class BladeCacheManagerTest extends TestCase
 {
 
     function test_it_caches_the_given_key_from_model()
