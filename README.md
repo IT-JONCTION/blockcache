@@ -229,25 +229,99 @@ The `@cache($key)` directive will either retrieve content from the cache or crea
 
 The secret to these strategies is using the cache utility classes provided by the `HasCacheKey` trait, which should be added to classes where you want to use the block cache. The trait includes methods for well-known cache invalidation strategies.
 
-<!-- 
-- **Time-to-Live (TTL):** Automatically expires cached content after a set period.
-  - `setTTL($key, $seconds)`
-- **Manual Invalidation:** Requires explicit action to clear or refresh the cache.
-  - `invalidateCache($key)`
-- **Cache Tags:** Tags related content together, allowing for group invalidation.
-  - `tagCache($key, $tags)`
-  - `invalidateCacheByTag($tag)`
-- **Content Versioning:** Uses version numbers in URLs to force cache updates.
-  - `setVersionedCache($key, $version)`
-- **Stale-While-Revalidate:** Serves stale content while asynchronously updating the cache.
-  - `setStaleWhileRevalidate($key, $content)`
-- **Event-Driven Invalidation:** Triggers cache invalidation based on specific events or changes in data.
-  - `invalidateOnEvent($key, $event)`
-- **Conditional Requests:** Uses HTTP headers to validate cache freshness before serving.
-  - `conditionalCache($key, $headers)`
-- **Write-Through Cache:** Updates cache key when the data within the cache changes.
-  - `writeThroughCache($key)`
--->
+You can implement various cache invalidation strategies using a key-value store in the form of an associative array as the second parameter of the Blade directive. Here are the strategies:
+
+#### Write-Through Cache
+
+Updates cache key when the data within the cache changes. This strategy relies on the `updated_at` timestamp of the model.
+
+```html
+@cache($eloquentModel->getCacheKey())
+    <div>view fragment</div>
+@endcache
+```
+
+#### Time-to-Live (TTL): in progress
+
+Automatically expires cached content after a period set in seconds.
+
+```html
+@cache('my-unique-key', ['ttl' => 60])
+    <div>view fragment</div>
+@endcache
+```
+
+#### Manual Invalidation: todo
+
+Requires explicit action to clear or refresh the cache.
+
+```html
+@cache('my-unique-key', ['manual' => true])
+    <div>view fragment</div>
+@endcache
+```
+
+To manually clear this cache, use the below (views is the default tag):
+
+```php
+Cache::tags('views')->flush();
+```
+
+#### Cache Tags: todo
+
+Tags related content together, allowing for group invalidation.
+
+```html
+@cache('my-unique-key', ['tags' => ['tag1', 'tag2']])
+    <div>view fragment</div>
+@endcache
+```
+
+To manually clear this cache, use:
+
+```php
+Cache::tags(['tag1', 'tag2'])->flush();
+```
+
+#### Content Versioning: todo 
+
+Uses the version numbers to force cache updates on each release.
+
+```html
+@cache('my-unique-key', ['version' => 'v1'])
+    <div>view fragment</div>
+@endcache
+```
+
+#### Stale-While-Revalidate: todo
+
+Serves stale content while asynchronously updating the cache.
+
+```html
+@cache('my-unique-key', ['stale-while-revalidate' => true])
+    <div>view fragment</div>
+@endcache
+```
+
+#### Event-Driven Invalidation: todo
+
+Triggers cache invalidation based on specific events.
+
+```html
+@cache('my-unique-key', ['event' => 'modelUpdated'])
+    <div>view fragment</div>
+@endcache
+```
+
+#### Conditional Requests: todo
+
+Uses HTTP headers to validate cache freshness before serving.
+
+```html
+@cache('my-unique-key', ['conditional' => true])
+    <div>view fragment</div>
+@endcache
+```
 
 ### Caching Collections
 
@@ -272,25 +346,15 @@ Behind the scenes, this package will detect that you've passed a Laravel collect
 Yes. For example:
 
 ```html
-@cache($post)
+@cache('my-custom-key')
     <div>view here</div>
 @endcache
 ```
-
-The package will look for a `getCacheKey` method on the model. You can use the `Itjonction\Blockcache\HasCacheKey` trait to import this functionality. Alternatively, you may pass a second argument to the `@cache` directive:
-
-```html
-@cache($post, 'my-custom-key')
-    <div>view here</div>
-@endcache
-```
-
-This instructs the package to use `my-custom-key` for the cache instead, useful for tasks like pagination.
+Simply providing a string rather than a model instructs the package to use `my-custom-key` for the cache instead.
 
 ---
 
 **TODOs:**
-1. Write the docs.
-2. Link to a video of the POC.
-3. Determine how to set a flag to avoid caching in dev or recognize template changes without relying on middleware.
-4. Write all the invalidation strategies.
+1. Link to a video of the POC.
+2. Determine how to set a flag to avoid caching in dev or recognize template changes without relying on middleware.
+3. Write all the invalidation strategies.
