@@ -1,0 +1,28 @@
+name: Run PHPUnit Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+      - '*'
+
+jobs:
+  phpunit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1' # or '8.0' or '7.4' depending on your requirement
+          extensions: mbstring, xml, curl
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Run PHPUnit
+        run: ./vendor/bin/phpunit
