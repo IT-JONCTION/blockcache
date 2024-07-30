@@ -323,6 +323,13 @@ Uses HTTP headers to validate cache freshness before serving.
 @endcache
 ```
 
+#### Legacy Invalidation Strategies
+All strategies are available for use in your legacy code, even if you're not using Laravel.
+
+```php
+$cacheManager->startCache('my-cache-key', ['ttl' => 60]);
+```
+
 ### Caching Collections
 
 You may also wish to cache a Laravel collection:
