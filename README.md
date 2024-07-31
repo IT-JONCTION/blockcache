@@ -364,3 +364,12 @@ Simply providing a string, rather than a model, instructs the package to use `my
 1. Link to a video of the POC.
 2. Determine how to set a flag to avoid caching in dev or recognize template changes without relying on middleware.
 3. Write all the invalidation strategies.
+- [x] Write-Through Cache
+- [x] Manual Invalidation
+- [ ] Time-to-Live (TTL)
+- [ ] Cache Tags
+- [ ] Content Versioning
+- [ ] Stale-While-Revalidate
+- [ ] Conditional Requests
+- [ ] Event-Driven Invalidation
+
