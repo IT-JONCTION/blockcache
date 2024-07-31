@@ -231,7 +231,7 @@ The secret to these strategies is using the cache utility classes provided by th
 
 You can implement various cache invalidation strategies using a key-value store in the form of an associative array as the second parameter of the Blade directive. Here are the strategies:
 
-#### Write-Through Cache
+#### Write-Through Cache: done
 
 Updates cache key when the data within the cache changes. This strategy relies on the `updated_at` timestamp of the model.
 
@@ -239,6 +239,22 @@ Updates cache key when the data within the cache changes. This strategy relies o
 @cache($eloquentModel->getCacheKey())
     <div>view fragment</div>
 @endcache
+```
+
+#### Manual Invalidation: done
+
+Requires explicit action to clear or refresh the cache. This is the default behavior.
+
+```html
+@cache('my-unique-key')
+    <div>view fragment</div>
+@endcache
+```
+
+To manually clear this cache, use the below (views is the default tag):
+
+```php
+Cache::tags('views')->flush();
 ```
 
 #### Time-to-Live (TTL): in progress
@@ -249,22 +265,6 @@ Automatically expires cached content after a period set in seconds.
 @cache('my-unique-key', ['ttl' => 60])
     <div>view fragment</div>
 @endcache
-```
-
-#### Manual Invalidation: todo
-
-Requires explicit action to clear or refresh the cache.
-
-```html
-@cache('my-unique-key', ['manual' => true])
-    <div>view fragment</div>
-@endcache
-```
-
-To manually clear this cache, use the below (views is the default tag):
-
-```php
-Cache::tags('views')->flush();
 ```
 
 #### Cache Tags: todo
@@ -303,22 +303,21 @@ Serves stale content while asynchronously updating the cache.
 @endcache
 ```
 
-#### Event-Driven Invalidation: todo
-
-Triggers cache invalidation based on specific events.
-
-```html
-@cache('my-unique-key', ['event' => 'modelUpdated'])
-    <div>view fragment</div>
-@endcache
-```
-
 #### Conditional Requests: todo
 
 Uses HTTP headers to validate cache freshness before serving.
 
 ```html
 @cache('my-unique-key', ['conditional' => true])
+<div>view fragment</div>
+@endcache
+
+#### Event-Driven Invalidation: on hold : blocked by lack of event support in legacy code
+
+Triggers cache invalidation based on specific events.
+
+```html
+@cache('my-unique-key', ['event' => 'modelUpdated'])
     <div>view fragment</div>
 @endcache
 ```
