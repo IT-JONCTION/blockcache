@@ -275,7 +275,7 @@ Or you can set the TTL as a random period by setting a range:
 ```
 When caching various fragments, this will ensure that they don't all expire at the same time.
 
-#### Cache Tags: todo
+#### Cache Tags: todo(1%)
 
 Tags related content together, allowing for group invalidation.
 
