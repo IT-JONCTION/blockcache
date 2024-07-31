@@ -241,7 +241,7 @@ Updates cache key when the data within the cache changes. This strategy relies o
 @endcache
 ```
 
-#### Time-to-Live (TTL): in progress
+#### Time-to-Live (TTL): in progress(1%)
 
 Automatically expires cached content after a period set in seconds.
 
