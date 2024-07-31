@@ -17,7 +17,7 @@ class CacheManager implements ManagesCaches
 
     // In CacheManager.php
 
-    public function put($key, $fragment, $ttl = null)
+    public function put($key, $fragment, $ttl = null): string
     {
         $key = $this->normalizeCacheKey($key);
         if ($ttl) {
