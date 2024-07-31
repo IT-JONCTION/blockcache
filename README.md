@@ -311,6 +311,7 @@ Uses HTTP headers to validate cache freshness before serving.
 @cache('my-unique-key', ['conditional' => true])
 <div>view fragment</div>
 @endcache
+```
 
 #### Event-Driven Invalidation: on hold : blocked by lack of event support in legacy code
 
