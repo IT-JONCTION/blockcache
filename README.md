@@ -412,7 +412,7 @@ Serves stale content while asynchronously updating the cache.
 @endcache
 ```
 
-#### Conditional Requests: todo
+#### Conditional Requests: todo (1% done)
 
 Uses HTTP headers to validate cache freshness before serving.
 
