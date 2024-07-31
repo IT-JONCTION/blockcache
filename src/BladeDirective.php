@@ -5,10 +5,12 @@ namespace Itjonction\Blockcache;
 use Exception;
 use Illuminate\Support\Collection;
 use Itjonction\Blockcache\Contracts\ManagesCaches;
+use Illuminate\Support\Facades\Log;
 
 class BladeDirective
 {
     protected array $keys = [];
+    protected array $options = [];
     protected ManagesCaches $cache;
 
     public function __construct(ManagesCaches $cache)
@@ -19,11 +21,18 @@ class BladeDirective
     /**
      * @throws Exception
      */
-    public function setUp($keyOrModel, $key = null)
+    public function setUp($keyOrModel, array $options = [])
     {
         ob_start();
-        $this->keys[] = $key = $this->normalizeKey($keyOrModel, $key);
-        return $this->cache->has($key);
+        $this->options = $options;
+        try {
+            $this->keys[] = $key = $this->normalizeKey($keyOrModel);
+            return $this->cache->has($key);
+        } catch (Exception $e) {
+            // don't allow exceptions to bubble up as they will break the view
+            Log::error($e->getMessage());
+            return false;
+        }
     }
 
     public function tearDown()
@@ -37,26 +46,21 @@ class BladeDirective
      * Normalize the cache key.
      *
      * @param  mixed  $item
-     * @param  string|null  $key
      * @return mixed|string|null
      * @throws Exception
      */
-    protected function normalizeKey(mixed $item, string $key = null): mixed
+    protected function normalizeKey(mixed $item): mixed
     {
-        // If the user wants to provide their own cache
-        // key, we'll opt for that.
-        if (is_string($item) || is_string($key)) {
-            return is_string($item) ? $item : $key;
+        // User provided a string - so that is the key.
+        if (is_string($item) ) {
+            return $item;
         }
 
-        // Otherwise we'll try to use the item to calculate
-        // the cache key, itself.
         if (is_object($item) && method_exists($item, 'getCacheKey')) {
             return $item->getCacheKey();
         }
 
-        // If we're dealing with a collection, we'll
-        // use a hashed version of its contents.
+        // If a collection, the key is a hash of its contents.
         if ($item instanceof Collection) {
             return md5($item);
         }
@@ -64,4 +68,8 @@ class BladeDirective
         throw new Exception('Could not determine an appropriate cache key.');
     }
 
+    public function getOptions()
+    {
+        return $this->options;
+    }
 }
