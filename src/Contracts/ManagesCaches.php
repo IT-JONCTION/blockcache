@@ -10,5 +10,5 @@ interface ManagesCaches
 
     public function put($key, $fragment, $ttl = null): string;
 
-    public function has($key);
+    public function has($key): bool;
 }

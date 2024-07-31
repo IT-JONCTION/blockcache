@@ -12,6 +12,7 @@ class BladeDirective
     protected array $keys = [];
     protected array $options = [];
     protected ManagesCaches $cache;
+    protected array $knownStrategies = ['ttl'];
 
     public function __construct(ManagesCaches $cache)
     {
@@ -21,7 +22,7 @@ class BladeDirective
     /**
      * @throws Exception
      */
-    public function setUp($keyOrModel, array $options = [])
+    public function setUp($keyOrModel, array $options = []): bool
     {
         ob_start();
         $this->options = $options;
