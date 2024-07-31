@@ -39,6 +39,32 @@ class BladeDirectiveTest extends TestCase
         $directive->tearDown();
     }
 
+    public function test_it_knows_when_we_ask_for_ttl()
+    {
+        $directive = $this->createNewCacheDirective();
+        $post = $this->makePost();
+        $directive->setUp($post, ['ttl' => 60]);
+        $options = $directive->getOptions();
+        $this->assertIsArray($options, 'Options should be an array.');
+        $this->assertArrayHasKey('ttl', $options, 'Options should contain a ttl key.');
+        $this->assertEquals(60, $options['ttl'], 'TTL value should be 60.');
+        $directive->tearDown();
+    }
+
+    public function test_it_throws_error_when_unknown_strategy_is_asked_for()
+    {
+        // Arrange
+        $directive = $this->createNewCacheDirective();
+        $post = $this->makePost();
+        // Act & Assert
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Unknown caching strategy: unknown_strategy');
+        $directive->setUp($post, ['GuineaPigs' => true]);
+        $directive->tearDown();
+    }
+
+
+
     protected function createNewCacheDirective(): BladeDirective
     {
         $cache = new Repository(
