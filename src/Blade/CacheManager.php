@@ -15,12 +15,16 @@ class CacheManager implements ManagesCaches
         $this->cache = $cache;
     }
 
-    public function put($key, $fragment)
+    // In CacheManager.php
+
+    public function put($key, $fragment, $ttl = null)
     {
         $key = $this->normalizeCacheKey($key);
-        return $this->cache
-          ->tags('views')
-          ->rememberForever($key, function () use ($fragment) {
+        if ($ttl) {
+            $this->cache->tags('views')->put($key, $fragment, $ttl);
+            return $fragment;
+        }
+        return $this->cache->tags('views')->rememberForever($key, function () use ($fragment) {
             return $fragment;
         });
     }
