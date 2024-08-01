@@ -36,11 +36,27 @@ class BladeDirective
         }
     }
 
-    public function tearDown()
+    public function tearDown(): false|string|null
     {
-        return $this->cache->put(
-          array_pop($this->keys), ob_get_clean()
-        );
+        $localKeys = $this->keys;
+        foreach ($this->options as $strategy => $value) {
+            try {
+                return $this->applyCacheStrategy($strategy, $localKeys, $value);
+            } catch (Exception $e) {
+                Log::error($e->getMessage());
+                // If the strategy failed, we refuse to cache and return the output.
+                if (ob_get_level() > 0) {
+                    return ob_get_clean();
+                }
+            }
+        }
+        // If no strategy was provided, we'll default to
+        if (ob_get_level() > 0) {
+            return $this->cache->put(
+              array_pop($this->keys), ob_get_clean()
+            );
+        }
+        return '';
     }
 
     /**
@@ -72,5 +88,23 @@ class BladeDirective
     public function getOptions()
     {
         return $this->options;
+    }
+
+    /**
+     * @param  int|string  $strategy
+     * @param  mixed  $key
+     * @param  mixed  $value
+     * @return false|string|null
+     * @throws Exception
+     */
+    public function applyCacheStrategy(int|string $strategy, mixed $key, mixed $value): false|string|null
+    {
+        if (ob_get_level() > 0) {
+            return match ($strategy) {
+                'ttl' => $this->cache->put($key, ob_get_clean(), $value),
+                default => throw new Exception('Unknown strategy: '.$strategy),
+            };
+        }
+        return '';
     }
 }

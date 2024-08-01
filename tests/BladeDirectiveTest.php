@@ -5,6 +5,10 @@ use Illuminate\Cache\ArrayStore;
 use Illuminate\Cache\Repository;
 use Itjonction\Blockcache\BladeDirective;
 use Itjonction\Blockcache\Blade\CacheManager;
+use TiMacDonald\Log\LogEntry;
+use TiMacDonald\Log\LogFake;
+use TiMacDonald\Log\ChannelFake;
+use Illuminate\Support\Facades\Log;
 
 class BladeDirectiveTest extends TestCase
 {
@@ -53,14 +57,15 @@ class BladeDirectiveTest extends TestCase
 
     public function test_it_throws_error_when_unknown_strategy_is_asked_for()
     {
-        // Arrange
+        LogFake::Bind();
         $directive = $this->createNewCacheDirective();
         $post = $this->makePost();
-        // Act & Assert
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Unknown caching strategy: unknown_strategy');
         $directive->setUp($post, ['GuineaPigs' => true]);
         $directive->tearDown();
+        Log::channel('stack')->assertLogged(fn (LogEntry $log) =>
+          $log->level === 'error'
+          && $log->message === 'Unknown strategy: GuineaPigs'
+        );
     }
 
 
