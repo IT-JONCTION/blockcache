@@ -94,6 +94,20 @@ class BladeDirectiveTest extends TestCase
         $this->assertTrue($this->cacheManager->has('my-unique-key','tag'));
     }
 
+    public function test_it_handles_versions()
+    {
+        $directive = $this->createNewCacheDirective();
+        $directive->setUp('my-unique-key', ['version' => '1.4.3']);
+        echo "<div>view tag</div>";
+        $directive->tearDown();
+        $options = $directive->getOptions();
+        $this->assertIsArray($options, 'Options should be an array.');
+        $this->assertArrayHasKey('version', $options, 'Options should contain a tags key.');
+        $this->assertIsString($options['version'], 'Tag should be a string.');
+        //test that we set the tag
+        $this->assertTrue($this->cacheManager->has('my-unique-key/v1.4.3'));
+    }
+
     public function test_it_handles_multiple_tags()
     {
         $directive = $this->createNewCacheDirective();
