@@ -11,6 +11,7 @@ class BladeDirective
 {
     protected array $keys = [];
     protected array $options = [];
+    protected int $ttl;
     protected ManagesCaches $cache;
     protected array $knownStrategies = ['ttl'];
 
@@ -90,6 +91,11 @@ class BladeDirective
         return $this->options;
     }
 
+    public function getTtl()
+    {
+        return $this->ttl;
+    }
+
     /**
      * @param  int|string  $strategy
      * @param  mixed  $key
@@ -101,10 +107,15 @@ class BladeDirective
     {
         if (ob_get_level() > 0) {
             return match ($strategy) {
-                'ttl' => $this->cache->put($key, ob_get_clean(), $value),
+                'ttl' => $this->cache->put($key, ob_get_clean(), $this->normalizeTtl($value)),
                 default => throw new Exception('Unknown strategy: '.$strategy),
             };
         }
         return '';
+    }
+
+    private function normalizeTtl(mixed $value)
+    {
+        return $this->ttl = is_array($value) ? rand(...$value) : $value;
     }
 }

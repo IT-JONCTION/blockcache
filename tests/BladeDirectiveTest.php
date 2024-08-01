@@ -43,7 +43,7 @@ class BladeDirectiveTest extends TestCase
         $directive->tearDown();
     }
 
-    public function test_it_knows_when_we_ask_for_ttl()
+    public function test_it_handles_single_ttl_value()
     {
         $directive = $this->createNewCacheDirective();
         $post = $this->makePost();
@@ -53,6 +53,18 @@ class BladeDirectiveTest extends TestCase
         $this->assertArrayHasKey('ttl', $options, 'Options should contain a ttl key.');
         $this->assertEquals(60, $options['ttl'], 'TTL value should be 60.');
         $directive->tearDown();
+    }
+
+    public function test_it_handles_multiple_ttl_value()
+    {
+        $directive = $this->createNewCacheDirective();
+        $post = $this->makePost();
+        $directive->setUp($post, ['ttl' => [60, 120]]);
+        $directive->tearDown();
+        $options = $directive->getOptions();
+        $this->assertIsArray($options, 'Options should be an array.');
+        $this->assertArrayHasKey('ttl', $options, 'Options should contain a ttl key.');
+        $this->assertIsInt($directive->getTtl(), 'TTL value should be a random Int.');
     }
 
     public function test_it_throws_error_when_unknown_strategy_is_asked_for()
