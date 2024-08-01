@@ -8,7 +8,7 @@ interface ManagesCaches
 {
     public function __construct(Repository $cache);
 
-    public function put($key, $fragment);
+    public function put($key, $fragment, $ttl = null): string;
 
-    public function has($key);
+    public function has($key): bool;
 }
