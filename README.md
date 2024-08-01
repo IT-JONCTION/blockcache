@@ -375,7 +375,7 @@ Simply providing a string, rather than a model, instructs the package to use `my
 3. Write all the invalidation strategies.
 - [x] Write-Through Cache
 - [x] Manual Invalidation
-- [ ] Time-to-Live (TTL)
+- [x] Time-to-Live (TTL)
 - [ ] Cache Tags
 - [ ] Content Versioning
 - [ ] Stale-While-Revalidate
