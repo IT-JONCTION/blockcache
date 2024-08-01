@@ -275,7 +275,7 @@ Or you can set the TTL as a random period by setting a range:
 ```
 When caching various fragments, this will ensure that they don't all expire at the same time.
 
-#### Cache Tags: todo(1%)
+#### Cache Tags: done
 
 Tags related content together, allowing for group invalidation.
 
@@ -285,11 +285,112 @@ Tags related content together, allowing for group invalidation.
 @endcache
 ```
 
-To manually clear this cache, use:
+### Understanding Cache Tags in Laravel
 
+**Cache Tags**:
+- Allow you to assign multiple tags to a cache item.
+- Provide a way to group related cache items and perform bulk operations (e.g., invalidate all items with a specific tag).
+
+### How Cache Tags Work
+
+When you use tags, you essentially create a composite key that includes all the specified tags. This means that when you 
+store an item with multiple tags, you must also retrieve it with the same set of tags.
+
+### Example
+
+If you store an item with tags `['orders', 'invoices']`, the cache system internally creates a key that represents this 
+combination of tags. To retrieve this item, you must specify both tags.
+
+### Storing and Retrieving with Tags
+
+When you store an item with:
 ```php
-Cache::tags(['tag1', 'tag2'])->flush();
+$this->cache->tags(['orders', 'invoices'])->put('my-unique-key', $fragment, $ttl);
 ```
+To retrieve it, you must use:
+```php
+$this->cache->tags(['orders', 'invoices'])->get('my-unique-key');
+```
+
+If you try to retrieve it with a single tag or a different combination, it won't find the item.
+
+### Testing Cache Tags
+
+1. **Passing Test**: This passes because you check the existence of the key with the exact combination of tags.
+    ```php
+    $this->assertTrue($this->cacheManager->has('my-unique-key',['orders','invoices']));
+    ```
+
+2. **Failing Test**: This fails because you check the existence with individual tags, which doesn't match the composite key.
+    ```php
+    $this->assertTrue($this->cacheManager->has('my-unique-key','orders'));
+    $this->assertTrue($this->cacheManager->has('my-unique-key','invoices'));
+    ```
+
+### Why Is This Happening?
+
+When you use:
+```php
+$this->cache->tags(['orders', 'invoices'])->put('my-unique-key', $fragment, $ttl);
+```
+- It stores the item under a composite key generated from `['orders', 'invoices']`.
+
+When you check:
+```php
+$this->cache->has('my-unique-key', 'orders'); // Incorrect
+$this->cache->has('my-unique-key', 'invoices'); // Incorrect
+```
+- These checks don't find the item because it's stored under the composite key, not under each individual tag.
+
+### Correct Approach for Tests
+
+To correctly test the cache with multiple tags, always use the exact tag combination used during storage:
+
+**Test for Multiple Tags:**
+```php
+public function test_it_handles_multiple_tags()
+{
+    $directive = $this->createNewCacheDirective();
+    $directive->setUp('my-unique-key', ['tags' => ['orders','invoices']]);
+    echo "<div>view tags</div>";
+    $directive->tearDown();
+    $options = $directive->getOptions();
+    $this->assertIsArray($options, 'Options should be an array.');
+    $this->assertArrayHasKey('tags', $options, 'Options should contain a tags key.');
+    $this->assertIsArray($options['tags'], 'Tags should be an array.');
+    // Check using the exact combination of tags
+    $this->assertTrue($this->cacheManager->has('my-unique-key', ['orders', 'invoices']));
+}
+```
+
+### Bulk Operations and Invalidation
+
+#### Invalidating Cache Items with Tags
+
+When you invalidate cache items using tags, it affects all items that include those tags.
+
+**Example**:
+If you have an item tagged with `['orders', 'invoices']` and you invalidate `orders`, it will also invalidate the item 
+tagged with both `orders` and `invoices`.
+
+**Code Example**:
+```php
+Cache::tags('orders')->flush();
+```
+This will invalidate:
+- Items tagged with `['orders']`
+- Items tagged with `['orders', 'invoices']`
+- Any other combination that includes `orders`
+
+**Explanation**:
+- **Composite Key**: Understand that tags create a composite key.
+- **Consistency**: Use the same tag combination for storing and retrieving.
+- **Bulk Operations**: Use tags to manage groups of cache items efficiently.
+- **Invalidation**: Invalidating a single tag will affect all items that include that tag, even if they have additional tags.
+
+By understanding and correctly using cache tags, you can efficiently group, manage, and invalidate related cache items. 
+Always remember to use the exact combination of tags for storing and retrieving cache items, and be aware that invalidating 
+a tag will affect all items that include that tag, even if they have additional tags. 
 
 #### Content Versioning: todo 
 
@@ -376,7 +477,7 @@ Simply providing a string, rather than a model, instructs the package to use `my
 - [x] Write-Through Cache
 - [x] Manual Invalidation
 - [x] Time-to-Live (TTL)
-- [ ] Cache Tags
+- [x] Cache Tags
 - [ ] Content Versioning
 - [ ] Stale-While-Revalidate
 - [ ] Conditional Requests
