@@ -80,6 +80,32 @@ class BladeDirectiveTest extends TestCase
         );
     }
 
+    public function test_it_handles_a_single_tag()
+    {
+        $directive = $this->createNewCacheDirective();
+        $directive->setUp('my-unique-key', ['tags' => 'tag']);
+        echo "<div>view tag</div>";
+        $directive->tearDown();
+        $options = $directive->getOptions();
+        $this->assertIsArray($options, 'Options should be an array.');
+        $this->assertArrayHasKey('tags', $options, 'Options should contain a tags key.');
+        $this->assertIsString($options['tags'], 'Tag should be a string.');
+        //test that we set the tag
+        $this->assertTrue($this->cacheManager->has('my-unique-key','tag'));
+    }
+
+    public function test_it_handles_multiple_tags()
+    {
+        $directive = $this->createNewCacheDirective();
+        $directive->setUp('my-unique-key', ['tags' => ['tag1','tag2']]);
+        echo "<div>view tags</div>";
+        $directive->tearDown();
+        $options = $directive->getOptions();
+        $this->assertIsArray($options, 'Options should be an array.');
+        $this->assertArrayHasKey('tags', $options, 'Options should contain a tags key.');
+        $this->assertIsArray($options['tags'], 'Tags should be a Array.');
+        $this->assertTrue($this->cacheManager->has('my-unique-key',['tag1','tag2']));
+    }
 
 
     protected function createNewCacheDirective(): BladeDirective

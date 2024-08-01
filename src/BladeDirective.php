@@ -28,7 +28,7 @@ class BladeDirective
         ob_start();
         $this->options = $options;
         try {
-            $this->keys[] = $key = $this->normalizeKey($keyOrModel);
+            $this->keys[] = $key = $this->normalizeKey($keyOrModel); //why is this an array?
             return $this->cache->has($key);
         } catch (Exception $e) {
             // don't allow exceptions to bubble up as they will break the view
@@ -42,7 +42,7 @@ class BladeDirective
         $localKeys = $this->keys;
         foreach ($this->options as $strategy => $value) {
             try {
-                return $this->applyCacheStrategy($strategy, $localKeys, $value);
+                return $this->applyCacheStrategy($strategy, array_pop($localKeys), $value);
             } catch (Exception $e) {
                 Log::error($e->getMessage());
                 // If the strategy failed, we refuse to cache and return the output.
@@ -107,6 +107,7 @@ class BladeDirective
     {
         if (ob_get_level() > 0) {
             return match ($strategy) {
+                'tags' => $this->cache->put($key, ob_get_clean(), null, $value),
                 'ttl' => $this->cache->put($key, ob_get_clean(), $this->normalizeTtl($value)),
                 default => throw new Exception('Unknown strategy: '.$strategy),
             };
