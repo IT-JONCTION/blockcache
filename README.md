@@ -257,7 +257,7 @@ To manually clear this cache, use the below (views is the default tag):
 Cache::tags('views')->flush();
 ```
 
-#### Time-to-Live (TTL): in progress(1%)
+#### Time-to-Live (TTL): done
 
 Automatically expires cached content after a period set in seconds.
 
@@ -266,6 +266,14 @@ Automatically expires cached content after a period set in seconds.
     <div>view fragment</div>
 @endcache
 ```
+Or you can set the TTL as a random period by setting a range:
+
+```html
+@cache('my-unique-key', ['ttl' => [60, 120]])
+    <div>view fragment</div>
+@endcache
+```
+When caching various fragments, this will ensure that they don't all expire at the same time.
 
 #### Cache Tags: todo
 
