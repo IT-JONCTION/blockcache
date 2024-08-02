@@ -471,9 +471,8 @@ Simply providing a string, rather than a model, instructs the package to use `my
 ---
 
 **TODOs:**
-1. Link to a video of the POC.
-2. Determine how to set a flag to avoid caching in dev or recognize template changes without relying on middleware.
-3. Write all the invalidation strategies.
+- [ ] Link to a video of the POC.
+- [ ] Set a flag to avoid caching in dev 
 - [x] Write-Through Cache
 - [x] Manual Invalidation
 - [x] Time-to-Live (TTL)
@@ -482,4 +481,8 @@ Simply providing a string, rather than a model, instructs the package to use `my
 - [ ] Stale-While-Revalidate
 - [ ] Conditional Requests
 - [ ] Event-Driven Invalidation
+- [ ] Add ability to Combine strategies
+- [ ] Invalidate on template changes with middleware
+- [ ] Invalidate on template changes without middleware
+
 
