@@ -188,3 +188,150 @@ You can send a request with a custom header to invalidate cache:
 curl -X GET "http://your-laravel-app.com/some-endpoint" -H "X-Invalidate-Cache: {\"keys\": [\"key1\"], \"tags\": [\"tag1\"], \"versions\": [\"version1\"]}"
 ```
 
+## Legacy Code Support
+You can load middleware in a legacy router. In Laravel, middleware can be applied to specific routes, route groups, or globally. 
+Even if you are using a legacy router, you can still apply middleware to handle HTTP requests and responses.
+
+Here’s how you can achieve this:
+
+### Step-by-Step Implementation
+
+1. **Create Middleware**: If you haven't already, create the middleware that handles conditional cache invalidation.
+2. **Register Middleware**: Register the middleware in the kernel or route middleware.
+3. **Apply Middleware to Legacy Routes**: Apply the middleware to your legacy routes.
+
+### Step 1: Create Middleware
+
+Assuming you have already created the `ConditionalCacheInvalidation` middleware:
+
+```php
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Support\Facades\Cache;
+
+class ConditionalCacheInvalidation
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle($request, Closure $next)
+    {
+        if ($request->hasHeader('X-Invalidate-Cache')) {
+            $invalidateCache = json_decode($request->header('X-Invalidate-Cache'), true);
+
+            if (isset($invalidateCache['keys'])) {
+                $this->invalidateKeys($invalidateCache['keys']);
+            }
+
+            if (isset($invalidateCache['tags'])) {
+                $this->invalidateTags($invalidateCache['tags']);
+            }
+
+            if (isset($invalidateCache['versions'])) {
+                $this->invalidateVersions($invalidateCache['versions']);
+            }
+        }
+
+        return $next($request);
+    }
+
+    protected function invalidateKeys(array $keys)
+    {
+        foreach ($keys as $key) {
+            Cache::forget($key);
+        }
+    }
+
+    protected function invalidateTags(array $tags)
+    {
+        foreach ($tags as $tag) {
+            Cache::tags($tag)->flush();
+        }
+    }
+
+    protected function invalidateVersions(array $versions)
+    {
+        foreach ($versions as $version) {
+            Cache::tags('version:' . $version)->flush();
+        }
+    }
+}
+```
+
+### Step 2: Register Middleware
+
+Register the middleware in `app/Http/Kernel.php`:
+
+```php
+protected $routeMiddleware = [
+    // Other middleware
+    'invalidate.cache' => \App\Http\Middleware\ConditionalCacheInvalidation::class,
+];
+```
+
+### Step 3: Apply Middleware to Legacy Routes
+
+You can apply the middleware to specific routes in your legacy router. Here’s how you can do it:
+
+1. **Access the Router**: Access the legacy router file where your routes are defined.
+2. **Apply Middleware**: Use the `middleware` method to apply the `invalidate.cache` middleware to the legacy routes.
+
+#### Example in a Legacy Router
+
+If your legacy routes are defined in a separate file, you can apply the middleware like this:
+
+```php
+use Illuminate\Support\Facades\Route;
+
+// Apply middleware to a specific route
+Route::middleware(['invalidate.cache'])->get('/legacy-route', function () {
+    // Your legacy route logic
+});
+
+// Apply middleware to a group of routes
+Route::middleware(['invalidate.cache'])->group(function () {
+    Route::get('/legacy-route1', function () {
+        // Your legacy route logic
+    });
+
+    Route::get('/legacy-route2', function () {
+        // Your legacy route logic
+    });
+});
+```
+
+### Applying Middleware Directly in Legacy Code
+
+If your legacy routing system does not use Laravel's routing, you might need to apply the middleware manually:
+
+#### Example in a Legacy Router
+
+```php
+use App\Http\Middleware\ConditionalCacheInvalidation;
+use Illuminate\Http\Request;
+
+// Simulate a request in your legacy router
+$request = Request::capture();
+
+// Instantiate the middleware
+$middleware = new ConditionalCacheInvalidation();
+
+// Apply the middleware
+$response = $middleware->handle($request, function ($request) {
+    // Your legacy route logic
+    return response('Legacy response');
+});
+
+// Send the response
+$response->send();
+```
+
+### Conclusion
+
+By following these steps, you can apply the `ConditionalCacheInvalidation` middleware to your legacy routes, ensuring that cache invalidation based on HTTP headers works seamlessly during your migration process. This approach allows you to leverage Laravel's middleware functionality even in a legacy routing setup.
+
