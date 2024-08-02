@@ -392,7 +392,7 @@ By understanding and correctly using cache tags, you can efficiently group, mana
 Always remember to use the exact combination of tags for storing and retrieving cache items, and be aware that invalidating 
 a tag will affect all items that include that tag, even if they have additional tags. 
 
-#### Content Versioning: todo 
+#### Content Versioning: done
 
 Uses the version numbers to force cache updates on each release.
 
@@ -478,7 +478,7 @@ Simply providing a string, rather than a model, instructs the package to use `my
 - [x] Manual Invalidation
 - [x] Time-to-Live (TTL)
 - [x] Cache Tags
-- [ ] Content Versioning
+- [x] Content Versioning
 - [ ] Stale-While-Revalidate
 - [ ] Conditional Requests
 - [ ] Event-Driven Invalidation

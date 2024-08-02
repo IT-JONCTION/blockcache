@@ -109,6 +109,7 @@ class BladeDirective
             return match ($strategy) {
                 'tags' => $this->cache->put($key, ob_get_clean(), null, $value),
                 'ttl' => $this->cache->put($key, ob_get_clean(), $this->normalizeTtl($value)),
+                'version' => $this->cache->put($key.'/v'.$value, ob_get_clean()),
                 default => throw new Exception('Unknown strategy: '.$strategy),
             };
         }
