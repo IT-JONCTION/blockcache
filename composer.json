@@ -13,6 +13,8 @@
         "illuminate/cache": ">=10.0 <13.0",
         "illuminate/config": "^10.0 || ^13.0",
         "illuminate/container": "^10.0 || ^13.0",
+        "illuminate/support": "^10.0 || ^13.0",
+        "illuminate/http": "^10.0 || ^13.0",
         "mockery/mockery": "2.0.x-dev",
         "timacdonald/log-fake": "dev-bumpVersion"
     },

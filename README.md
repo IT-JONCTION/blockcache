@@ -412,7 +412,7 @@ Serves stale content while asynchronously updating the cache.
 @endcache
 ```
 
-#### Conditional Requests: todo
+#### Conditional Requests: todo (1% done)
 
 Uses HTTP headers to validate cache freshness before serving.
 
@@ -421,6 +421,8 @@ Uses HTTP headers to validate cache freshness before serving.
 <div>view fragment</div>
 @endcache
 ```
+Conditional header-based cache invalidation allows the client to inform the server that the cached data is stale, 
+prompting the server to send fresh data.
 
 #### Event-Driven Invalidation: on hold : blocked by lack of event support in legacy code
 
