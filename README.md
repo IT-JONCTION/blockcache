@@ -75,33 +75,53 @@ $redisStore = new RedisStore($redisManager, 'cache');
 // Create the Cache repository instance
 $cache = new Repository($redisStore);
 $cacheManager = new CacheManager($cache);
-$cacheManager->startCache('my-cache-key');
-echo "<div>view fragment</div>";
+if (! $cacheManager->startCache('my-cache-key') ){
+    echo "<div>view fragment</div>";
+}
 $output = $cacheManager->endCache();
 ```
 
 Alternatively, even in legacy code, you can still bootstrap the Laravel application instance:
 
 ```php
-// bootstrap_laravel.php
+// php/bootstrap/legacy/laravel.php
 
-use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Foundation\Application;
+require_once __DIR__ . '/../../vendor/autoload.php';
 
-// Path to the Laravel application
-$appPath = __DIR__ . '/path/to/your/laravel';
+use Illuminate\Cache\CacheManager;
+use Illuminate\Container\Container;
+use Illuminate\Events\Dispatcher;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Config\Repository as ConfigRepository;
+use Illuminate\Redis\RedisManager;
 
-// Require the Laravel application
-$app = require $appPath . '/bootstrap/app.php';
+$container = new Container;
 
-// Make the kernel (HTTP kernel is enough to access most services)
-$kernel = $app->make(Kernel::class);
+// Set up the event dispatcher
+$events = new Dispatcher($container);
+$container->instance('events', $events);
 
-// Bootstrap the application
-$kernel->bootstrap();
+// Set up the configuration
+$config = new ConfigRepository([
+    'app' => require __DIR__ . '/../../config/app.php',
+    'cache' => require __DIR__ . '/../../config/legacy/cache.php',
+    'database' => require __DIR__ . '/../../config/legacy/database.php',
+]);
+$container->instance('config', $config);
 
-// You can now use Laravel's config, cache, etc.
-return $app;
+$files = new Filesystem;
+$container->instance('files', $files);
+
+// Set up the Redis manager
+$redisConfig = $config->get('database.redis');
+$redisManager = new RedisManager($container, $redisConfig['client'], $redisConfig);
+$container->instance('redis', $redisManager);
+
+// Set up the Cache manager
+$cacheManager = new CacheManager($container);
+$container->instance('cache', $cacheManager);
+
+return $container;
 ```
 
 This allows you to cache any view fragment, regardless of whether it's a Blade template or not.
@@ -110,13 +130,13 @@ This allows you to cache any view fragment, regardless of whether it's a Blade t
 use Itjonction\Blockcache\General\CacheManager;
 use Illuminate\Foundation\Application;
 
-// Create a new application instance (optional but useful for dependency resolution)
-$app = require __DIR__ . '/path/to/bootstrap_laravel.php';
+$container = require_once __DIR__ . '/../path/to/your/bootstrap/legacy/laravel.php';
 
 // Create the Cache repository instance
-$cacheManager = new CacheManager($app->make('cache'));
-$cacheManager->startCache('my-cache-key');
+$cacheManager = new CacheManager($container->make('cache')->store('redis'));
+if (! $cacheManager->startCache('my-cache-key') ){
 echo "<div>view fragment</div>";
+}
 $output = $cacheManager->endCache();
 ```
 
