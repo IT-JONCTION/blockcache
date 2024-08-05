@@ -8,7 +8,7 @@ use Itjonction\Blockcache\Contracts\ManagesCaches;
 
 class CacheManager implements ManagesCaches
 {
-    protected Repository $cache;
+    public Repository $cache;
 
     public function __construct(Repository $cache)
     {
