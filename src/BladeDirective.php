@@ -13,7 +13,6 @@ class BladeDirective
     protected array $options = [];
     protected int $ttl;
     protected ManagesCaches $cache;
-    protected array $knownStrategies = ['ttl'];
 
     public function __construct(ManagesCaches $cache)
     {
@@ -91,7 +90,7 @@ class BladeDirective
         return $this->options;
     }
 
-    public function getTtl()
+    public function getTtl(): int
     {
         return $this->ttl;
     }

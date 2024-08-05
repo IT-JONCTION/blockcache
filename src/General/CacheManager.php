@@ -19,12 +19,12 @@ class CacheManager extends BladeCacheManager
     /**
      * @throws Exception
      */
-    public function startCache($key)
+    public function startCache($key, array $options = []): bool
     {
-        return $this->bladeDirective->setUp($key);
+        return $this->bladeDirective->setUp($key, $options);
     }
 
-    public function endCache()
+    public function endCache(): bool|string|null
     {
         return $this->bladeDirective->tearDown();
     }
