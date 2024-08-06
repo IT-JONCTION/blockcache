@@ -490,6 +490,145 @@ Simply providing a string, rather than a model, instructs the package to use `my
 
 ---
 
+Sure, here is a section for the README.md file that explains how to add and configure the logger in your project.
+
+### Adding and Configuring the Logger
+
+To use the logging features provided by this package, follow these steps to configure the logger in your Laravel application. This package leverages Monolog for logging, and it integrates seamlessly with Laravel's logging system.
+
+#### 1. Install Monolog
+
+Ensure Monolog is included in your `composer.json` file. If it's not already there, add it to your project by running:
+
+```bash
+composer require monolog/monolog
+```
+
+#### 2. Configure the Logger in Laravel
+
+Open the `config/logging.php` file and add a new custom logging channel. This example demonstrates how to create a custom log channel using Monolog's `StreamHandler`:
+
+```php
+return [
+
+    'default' => env('LOG_CHANNEL', 'stack'),
+
+    'channels' => [
+        'stack' => [
+            'driver' => 'stack',
+            'channels' => ['single'],
+        ],
+
+        'single' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/laravel.log'),
+            'level' => 'debug',
+        ],
+
+        'custom' => [
+            'driver' => 'monolog',
+            'handler' => Monolog\Handler\StreamHandler::class,
+            'with' => [
+                'stream' => storage_path('logs/custom.log'),
+                'level' => Monolog\Logger::DEBUG,
+            ],
+        ],
+    ],
+];
+```
+
+This configuration defines a `custom` log channel that writes log messages to `storage/logs/custom.log`.
+
+#### 3. Inject and Use the Custom Logger
+
+In your application, you can inject and use the custom logger as needed. Here is an example of how to inject the logger into a controller:
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Psr\Log\LoggerInterface;
+
+class ExampleController extends Controller
+{
+    protected $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    public function index()
+    {
+        $this->logger->info('This is a custom log message.');
+    }
+}
+```
+
+#### 4. Example Usage in the Package
+
+When using the package, ensure that the logger is passed to the class that requires it. Here is an example of how to create and pass the logger:
+
+```php
+<?php
+
+use Itjonction\Blockcache\BladeDirective;
+use Illuminate\Cache\ArrayStore;
+use Illuminate\Cache\Repository;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
+$cache = new Repository(new ArrayStore);
+$logger = new Logger('blockcache');
+$logger->pushHandler(new StreamHandler(storage_path('logs/blockcache.log'), Logger::DEBUG));
+
+$bladeDirective = new BladeDirective($cache, $logger);
+```
+
+In this example, the `BladeDirective` class is instantiated with a custom logger, which writes logs to `storage/logs/blockcache.log`.
+
+#### 5. Testing with Monolog
+
+For testing purposes, you can use Monolog's `TestHandler` to capture log messages. Here's an example of setting up a test:
+
+```php
+<?php
+
+use Monolog\Logger;
+use Monolog\Handler\TestHandler;
+use Itjonction\Blockcache\BladeDirective;
+use Illuminate\Cache\ArrayStore;
+use Illuminate\Cache\Repository;
+
+class BladeDirectiveTest extends TestCase
+{
+    protected Logger $logger;
+    protected TestHandler $testHandler;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->testHandler = new TestHandler();
+        $this->logger = new Logger('blockcache_test');
+        $this->logger->pushHandler($this->testHandler);
+    }
+
+    public function test_logging_unknown_strategy()
+    {
+        $cache = new Repository(new ArrayStore);
+        $directive = new BladeDirective($cache, $this->logger);
+        
+        $directive->setUp('test_key', ['unknown_strategy' => true]);
+        $directive->tearDown();
+
+        $this->assertTrue($this->testHandler->hasErrorThatContains('Unknown strategy: unknown_strategy'));
+    }
+}
+```
+
+In this test, the `TestHandler` is used to capture and assert that the correct error message is logged.
+
 **TODOs:**
 - [ ] Link to a video of the POC.
 - [ ] Set a flag to avoid caching in dev 
@@ -502,6 +641,7 @@ Simply providing a string, rather than a model, instructs the package to use `my
 - [ ] Conditional Requests
 - [ ] Event-Driven Invalidation
 - [ ] Add ability to Combine strategies
+- [x] Allow logging to be injected into the cache manager
 - [ ] Invalidate on template changes with middleware
 - [ ] Invalidate on template changes without middleware
 
