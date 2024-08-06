@@ -490,8 +490,6 @@ Simply providing a string, rather than a model, instructs the package to use `my
 
 ---
 
-Sure, here is a section for the README.md file that explains how to add and configure the logger in your project.
-
 ### Adding and Configuring the Logger
 
 To use the logging features provided by this package, follow these steps to configure the logger in your Laravel application. This package leverages Monolog for logging, and it integrates seamlessly with Laravel's logging system.
