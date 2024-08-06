@@ -628,19 +628,13 @@ class BladeDirectiveTest extends TestCase
 In this test, the `TestHandler` is used to capture and assert that the correct error message is logged.
 
 **TODOs:**
-- [ ] Link to a video of the POC.
-- [ ] Set a flag to avoid caching in dev 
-- [x] Write-Through Cache
-- [x] Manual Invalidation
-- [x] Time-to-Live (TTL)
-- [x] Cache Tags
-- [x] Content Versioning
-- [ ] Stale-While-Revalidate
-- [ ] Conditional Requests
-- [ ] Event-Driven Invalidation
-- [ ] Add ability to Combine strategies
-- [x] Allow logging to be injected into the cache manager
-- [ ] Invalidate on template changes with middleware
-- [ ] Invalidate on template changes without middleware
+1. Link to a video of the POC.
+2. Set a flag to avoid caching in dev 
+3. Stale-While-Revalidate
+4. Conditional Requests
+5. Event-Driven Invalidation
+6. Add ability to Combine strategies
+7. Invalidate on template changes with middleware
+8. Invalidate on template changes without middleware
 
 
