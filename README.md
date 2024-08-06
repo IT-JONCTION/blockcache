@@ -180,6 +180,82 @@ Now, the cache key for this fragment will include the object's `id` and `updated
 
 > The key is that, because we factor the `updated_at` timestamp into the cache key, whenever you update the post, the cache key will change, effectively busting the cache.
 
+Now, you might render your view like this:
+
+**resources/views/cards/_card.blade.php**
+
+```html
+@cache($card)
+    <article class="Card">
+        <h2>{{ $card->title }}</h2>
+
+        <ul>
+            @foreach ($card->notes as $note)
+                @include ('cards/_note')
+            @endforeach
+        </ul>
+    </article>
+@endcache
+```
+
+**resources/views/cards/_note.blade.php**
+
+```html
+@cache($note)
+    <li>{{ $note->body }}</li>
+@endcache
+```
+
+Notice the Russian-Doll style cascading for our caches; if any note is updated, its individual cache will clear, along with its parent, but any siblings will remain untouched.
+
+Legacy Write-Through Cache:
+
+Because the write through cache relies on an `update_at` field in your database you will need to add that field should it not exist.
+To keep the `updated_at` field accurate in your legacy project, you can use database triggers. Here's a simple approach:
+
+
+1. **Create a Database Trigger:**
+   Write a trigger that updates the `updated_at` field on every update operation. This ensures the field is always updated, regardless of where the update originates.
+
+2. **MySQL Trigger Example:**
+   If you're using MySQL, here's a basic example:
+
+   ```sql
+   DELIMITER //
+
+   CREATE TRIGGER update_timestamp
+   BEFORE UPDATE ON your_table_name
+   FOR EACH ROW
+   BEGIN
+     SET NEW.updated_at = NOW();
+   END//
+
+   DELIMITER ;
+   ```
+
+3. **Add Eloquent Configuration:**
+   Ensure your models use the `updated_at` and `created_at` fields correctly. By default, Eloquent expects these fields.
+
+   ```php
+   class YourModel extends Model
+   {
+       public $timestamps = true;
+   }
+   ```
+
+4. **Update Legacy Code:**
+   Gradually refactor your legacy code to use Eloquent for database operations where possible.
+5. This will make it easier to manage and maintain the timestamps.
+
+5. **Manual Updates:**
+   For parts of the application that can't be refactored immediately, ensure the `updated_at` field is manually updated in SQL queries.
+
+   ```sql
+   UPDATE your_table_name SET column1 = value1, updated_at = NOW() WHERE condition;
+   ```
+
+By using database triggers and gradually refactoring your legacy code, you can ensure the `updated_at` field remains accurate and consistent.
+
 #### Touching
 
 For this technique to work properly, we need a mechanism to alert parent relationships (and subsequently bust parent caches) each time a model is updated. Here's a basic workflow:
@@ -215,35 +291,12 @@ class Note extends Model
 
 The `$touches = ['card']` portion instructs Laravel to ping the `card` relationship's timestamps each time the note is updated.
 
-Now, you might render your view like this:
+#### Legacy touch() Method
+For legacy code that doesn't use Eloquent, you will need to write into the logic of your class the ability to update the `updated_at` field of the parent in your database. 
+This will ensure that the cache key is updated whenever the data changes.
 
-**resources/views/cards/_card.blade.php**
 
-```html
-@cache($card)
-    <article class="Card">
-        <h2>{{ $card->title }}</h2>
-
-        <ul>
-            @foreach ($card->notes as $note)
-                @include ('cards/_note')
-            @endforeach
-        </ul>
-    </article>
-@endcache
-```
-
-**resources/views/cards/_note.blade.php**
-
-```html
-@cache($note)
-    <li>{{ $note->body }}</li>
-@endcache
-```
-
-Notice the Russian-Doll style cascading for our caches; if any note is updated, its individual cache will clear, along with its parent, but any siblings will remain untouched.
-
-### Other Invalidation Strategies
+### All Invalidation Strategies
 
 The `@cache($key)` directive will either retrieve content from the cache or create a new cache entry for the specified content. By manipulating the cache key, you can implement various caching strategies.
 
@@ -251,9 +304,9 @@ The secret to these strategies is using the cache utility classes provided by th
 
 You can implement various cache invalidation strategies using a key-value store in the form of an associative array as the second parameter of the Blade directive. Here are the strategies:
 
-#### Write-Through Cache: done
+#### Write-Through Cache:
 
-Updates cache key when the data within the cache changes. This strategy relies on the `updated_at` timestamp of the model.
+Updates cache key when the data within the cache changes. This strategy relies the HasCacheKey trait that uses `updated_at` timestamp of the model and touches parent models.
 
 ```html
 @cache($eloquentModel->getCacheKey())
