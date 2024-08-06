@@ -5,14 +5,15 @@ use Illuminate\Cache\ArrayStore;
 use Illuminate\Cache\Repository;
 use Itjonction\Blockcache\BladeDirective;
 use Itjonction\Blockcache\Blade\CacheManager;
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 
 class BladeDirectiveTest extends TestCase
 {
 
     protected CacheManager $cacheManager;
-    protected Logger $logger;
+    protected LoggerInterface $logger;
     protected TestHandler $testHandler;
 
     public function setUp(): void
