@@ -5,7 +5,8 @@ namespace Itjonction\Blockcache;
 use Exception;
 use Illuminate\Support\Collection;
 use Itjonction\Blockcache\Contracts\ManagesCaches;
-use Illuminate\Support\Facades\Log;
+use Monolog\Logger;
+use Monolog\Handler\NullHandler;
 
 class BladeDirective
 {
@@ -13,10 +14,15 @@ class BladeDirective
     protected array $options = [];
     protected int $ttl;
     protected ManagesCaches $cache;
+    private Logger $logger;
 
-    public function __construct(ManagesCaches $cache)
+    public function __construct(ManagesCaches $cache, Logger $logger = null)
     {
         $this->cache = $cache;
+        $this->logger = $logger ?: new Logger('blockcache');
+        if (!$logger) {
+            $this->logger->pushHandler(new NullHandler());
+        }
     }
 
     /**
@@ -27,11 +33,11 @@ class BladeDirective
         ob_start();
         $this->options = $options;
         try {
-            $this->keys[] = $key = $this->normalizeKey($keyOrModel); //why is this an array?
+            $this->keys[] = $key = $this->normalizeKey($keyOrModel); //it's an array so we can nest the cache
             return $this->cache->has($key);
         } catch (Exception $e) {
             // don't allow exceptions to bubble up as they will break the view
-            Log::error($e->getMessage());
+            $this->logger->error($e->getMessage());
             return false;
         }
     }
@@ -43,7 +49,7 @@ class BladeDirective
             try {
                 return $this->applyCacheStrategy($strategy, array_pop($localKeys), $value);
             } catch (Exception $e) {
-                Log::error($e->getMessage());
+                $this->logger->error($e->getMessage());
                 // If the strategy failed, we refuse to cache and return the output.
                 if (ob_get_level() > 0) {
                     return ob_get_clean();

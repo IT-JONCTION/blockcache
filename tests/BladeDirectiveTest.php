@@ -5,15 +5,24 @@ use Illuminate\Cache\ArrayStore;
 use Illuminate\Cache\Repository;
 use Itjonction\Blockcache\BladeDirective;
 use Itjonction\Blockcache\Blade\CacheManager;
-use TiMacDonald\Log\LogEntry;
-use TiMacDonald\Log\LogFake;
-use TiMacDonald\Log\ChannelFake;
-use Illuminate\Support\Facades\Log;
+use Psr\Log\LoggerInterface;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 
 class BladeDirectiveTest extends TestCase
 {
 
     protected CacheManager $cacheManager;
+    protected LoggerInterface $logger;
+    protected TestHandler $testHandler;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->testHandler = new TestHandler();
+        $this->logger = new Logger('blockcache_test');
+        $this->logger->pushHandler($this->testHandler);
+    }
 
     /**
      * @throws Exception
@@ -38,9 +47,9 @@ class BladeDirectiveTest extends TestCase
         $directive = $this->createNewCacheDirective();
         $post = $this->makePost();
         $directive->setUp($post, ['key' => 'value']);
+        $directive->tearDown();
         $this->assertTrue(is_array($directive->getOptions()));
         $this->assertEquals('value', $directive->getOptions()['key']);
-        $directive->tearDown();
     }
 
     public function test_it_handles_single_ttl_value()
@@ -69,15 +78,12 @@ class BladeDirectiveTest extends TestCase
 
     public function test_it_throws_error_when_unknown_strategy_is_asked_for()
     {
-        LogFake::Bind();
         $directive = $this->createNewCacheDirective();
         $post = $this->makePost();
         $directive->setUp($post, ['GuineaPigs' => true]);
         $directive->tearDown();
-        Log::channel('stack')->assertLogged(fn (LogEntry $log) =>
-          $log->level === 'error'
-          && $log->message === 'Unknown strategy: GuineaPigs'
-        );
+        $records = $this->testHandler->getRecords();
+        $this->assertTrue($this->testHandler->hasErrorThatContains('Unknown strategy: GuineaPigs'));
     }
 
     public function test_it_handles_a_single_tag()
@@ -121,13 +127,13 @@ class BladeDirectiveTest extends TestCase
         $this->assertTrue($this->cacheManager->has('my-unique-key',['tag1','tag2']));
     }
 
-
+// No-op for legacy
     protected function createNewCacheDirective(): BladeDirective
     {
         $cache = new Repository(
             new ArrayStore
         );
         $this->cacheManager = new CacheManager($cache);
-        return new BladeDirective($this->cacheManager);
+        return new BladeDirective($this->cacheManager, $this->logger);
     }
 }
