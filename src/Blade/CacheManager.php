@@ -17,12 +17,13 @@ class CacheManager implements ManagesCaches
 
     // In CacheManager.php
 
-    public function put($key, $fragment, int | null $ttl = null, string | array $tags = 'views'): string
+    public function remember($key, $fragment, int | null $ttl = null, string | array $tags = 'views'): string
     {
         $key = $this->normalizeCacheKey($key);
         if ($ttl) {
-            $this->cache->tags($tags)->put($key, $fragment, $ttl);
-            return $fragment;
+            $this->cache->tags($tags)->remember($key, $ttl, function () use ($fragment) {
+                return $fragment;
+            });
         }
         return $this->cache->tags($tags)->rememberForever($key, function () use ($fragment) {
             return $fragment;

@@ -14,7 +14,7 @@ class BladeCacheManagerTest extends TestCase
         );
         $cacheManager = new CacheManager($cache);
 
-        $cacheManager->put($post, '<div>view fragment</div>');
+        $cacheManager->remember($post, '<div>view fragment</div>');
         $this->assertTrue($cacheManager->has($post));
     }
     function test_it_caches_the_given_key_from_key()
@@ -25,7 +25,7 @@ class BladeCacheManagerTest extends TestCase
         );
         $cacheManager = new CacheManager($cache);
 
-        $cacheManager->put($post->getCacheKey(), '<div>view fragment</div>');
+        $cacheManager->remember($post->getCacheKey(), '<div>view fragment</div>');
         $this->assertTrue($cacheManager->has($post->getCacheKey()));
     }
     function test_it_caches_the_given_key_from_string()
@@ -35,7 +35,7 @@ class BladeCacheManagerTest extends TestCase
         );
         $cacheManager = new CacheManager($cache);
 
-        $cacheManager->put('arbitrary-string', '<div>view fragment</div>');
+        $cacheManager->remember('arbitrary-string', '<div>view fragment</div>');
         $this->assertTrue($cacheManager->has('arbitrary-string'));
     }
 }
