@@ -36,6 +36,12 @@ class CacheManager implements ManagesCaches
         return $this->cache->tags($tags)->has($key);
     }
 
+    public function get($key, $tags = 'views'): string
+    {
+        $key = $this->normalizeCacheKey($key);
+        return $this->cache->tags($tags)->get($key);
+    }
+
     protected function normalizeCacheKey($key)
     {
         if($key instanceof Cacheable) {
