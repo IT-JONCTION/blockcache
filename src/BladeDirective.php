@@ -58,7 +58,7 @@ class BladeDirective
         }
         // If no strategy was provided, we'll default to
         if (ob_get_level() > 0) {
-            return $this->cache->put(
+            return $this->cache->remember(
               array_pop($this->keys), ob_get_clean()
             );
         }
@@ -112,9 +112,9 @@ class BladeDirective
     {
         if (ob_get_level() > 0) {
             return match ($strategy) {
-                'tags' => $this->cache->put($key, ob_get_clean(), null, $value),
-                'ttl' => $this->cache->put($key, ob_get_clean(), $this->normalizeTtl($value)),
-                'version' => $this->cache->put($key.'/v'.$value, ob_get_clean()),
+                'tags' => $this->cache->remember($key, ob_get_clean(), null, $value),
+                'ttl' => $this->cache->remember($key, ob_get_clean(), $this->normalizeTtl($value)),
+                'version' => $this->cache->remember($key.'/v'.$value, ob_get_clean()),
                 default => throw new Exception('Unknown strategy: '.$strategy),
             };
         }
