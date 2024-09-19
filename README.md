@@ -495,7 +495,7 @@ Uses HTTP headers to validate cache freshness before serving.
 @endcache
 ```
 
-#### Event-Driven Invalidation: on hold : blocked by lack of event support in legacy code
+#### Event-Driven Invalidation: on hold : blocked (no event support in legacy code)
 
 Triggers cache invalidation based on specific events.
 
